@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Repositories\CourseRepository;
+use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 
 class CourseController extends Controller
 {
+    use ApiResponse;
+
     protected CourseRepository $courseRepo;
 
     public function __construct(CourseRepository $courseRepo)
@@ -18,7 +21,7 @@ class CourseController extends Controller
     public function index(Request $request)
     {
         $courses = $this->courseRepo->paginate(10);
-        return response()->json($courses);
+        return $this->success($courses, 'Kurslar Başarıyla Bulundu',200);
     }
 
     public function show($id)
@@ -26,10 +29,10 @@ class CourseController extends Controller
         $course = $this->courseRepo->find($id);
 
         if (!$course) {
-            return response()->json(['message' => 'Course not found'], 404);
+            return $this->error('Kurs Bulunamadı', 404);
         }
 
-        return response()->json($course);
+        return $this->success($course,'Kurs Başarıyla Bulundu', 200);
     }
 
     public function store(Request $request)
@@ -44,7 +47,7 @@ class CourseController extends Controller
         ]);
 
         $course = $this->courseRepo->create($validated);
-        return response()->json($course, 201);
+        return $this->success($course,'Başarıyla Oluşturuldu', 201);
     }
 
     public function update(Request $request, $id)
@@ -61,10 +64,10 @@ class CourseController extends Controller
         $course = $this->courseRepo->update($id, $validated);
 
         if (!$course) {
-            return response()->json(['message' => 'Course not found'], 404);
+            return $this->error('Course not found', 404);
         }
 
-        return response()->json($course);
+        return $this->success($course,'Kurs Başarıyla Güncellendi', 200);
     }
 
     public function destroy($id)
@@ -72,9 +75,9 @@ class CourseController extends Controller
         $deleted = $this->courseRepo->delete($id);
 
         if (!$deleted) {
-            return response()->json(['message' => 'Course not found or already deleted'], 404);
+            return $this->error('Course not found or already deleted', 404);
         }
 
-        return response()->json(['message' => 'Course deleted successfully']);
+        return $this->success(null,'Course deleted successfully',200);
     }
 }
